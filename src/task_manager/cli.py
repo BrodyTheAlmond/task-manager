@@ -21,13 +21,14 @@ def main(argv=None):
     args = parser.parse_args(argv)
 
     if args.command == 'add':
-        add(args.task)
+        added_task = add(args.task)
+        print(added_task)
     elif args.command == 'complete':
         complete(args.index)
     elif args.command == 'delete':
         delete(args.index)
     elif args.command == 'show':
-        show()
+        print(show())
 
 
 if __name__ == '__main__':
