@@ -19,17 +19,27 @@ def add(task, file_path=DEFAULT_PATH):
     ensure_file(file_path)
     new_task = pd.DataFrame([{'Task': task, 'Completed': 'no'}])
     new_task.to_csv(file_path, mode='a', index=False, header=False)
+    return f'{task} has been added to Task Manager'
 
 
 def complete(index, file_path=DEFAULT_PATH):
     tasks = pd.read_csv(file_path)
-    tasks.loc[index, 'Completed'] = 'yes'
-    tasks.to_csv('tasks.csv', index=False)
+    if index <= len(tasks):
+        tasks.loc[index, 'Completed'] = 'yes'
+        tasks.to_csv(file_path, index=False)
+        return f'{tasks.loc[index, "Tasks"]} has been completed in Task Manager'
+    else:
+        return f'chosen index is out of range or invalid: {index}'
 
 
 def delete(index, file_path=DEFAULT_PATH):
-    tasks = pd.read_csv(file_path).drop(index=index).reset_index(drop=True)
-    tasks.to_csv('tasks.csv', index=False)
+    tasks = pd.read_csv(file_path)
+    if index <= len(tasks):
+        tasks.drop(index=index).reset_index(drop=True)
+        tasks.to_csv(file_path, index=False)
+        return f'{tasks.loc[index, "Tasks"]} has been removed from Task Manager'
+    else:
+        return 'chosen index is out of range or invalid'
 
 
 def show(file_path=DEFAULT_PATH):
