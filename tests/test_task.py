@@ -73,7 +73,7 @@ def test_delete_removes_middle_row(csv_file):
     delete(1, file_path=csv_file)
     df = pd.read_csv(csv_file)
     assert df.iloc[0]['Task'] == "a"
-    assert df.iloc[0]['Task'] == "d"
+    assert df.iloc[1]['Task'] == "d"
 
 
 def test_complete_does_not_accept_invalid_index(csv_file):
