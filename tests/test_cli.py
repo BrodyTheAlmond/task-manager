@@ -1,5 +1,5 @@
 from unittest.mock import patch
-from src.task_manager.cli import main
+from task_manager.cli import main
 
 
 def test_add_command_calls_add():

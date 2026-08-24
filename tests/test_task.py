@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-from src.task_manager.tasks import add, show, complete, delete, ensure_file
+from task_manager.tasks import add, show, complete, delete, ensure_file
 
 
 @pytest.fixture

@@ -1,5 +1,5 @@
 import argparse
-from tasks import add, complete, delete, show, ensure_file
+from src.task_manager.tasks import add, complete, delete, show, ensure_file
 
 
 def main(argv=None):
@@ -21,12 +21,11 @@ def main(argv=None):
     args = parser.parse_args(argv)
 
     if args.command == 'add':
-        added_task = add(args.task)
-        print(added_task)
+        print(add(args.task))
     elif args.command == 'complete':
-        complete(args.index)
+        print(complete(args.index))
     elif args.command == 'delete':
-        delete(args.index)
+        print(delete(args.index))
     elif args.command == 'show':
         print(show())
 
