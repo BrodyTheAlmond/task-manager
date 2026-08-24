@@ -23,25 +23,25 @@ def add(task, file_path=DEFAULT_PATH):
 
 
 def complete(index, file_path=DEFAULT_PATH):
-    tasks = pd.read_csv(file_path)
-    if index <= len(tasks):
-        tasks.loc[index, 'Completed'] = 'yes'
-        tasks.to_csv(file_path, index=False)
-        return f'{tasks.loc[index, "Tasks"]} has been completed in Task Manager'
+    task = pd.read_csv(file_path)
+    if index < len(task):
+        task.loc[index, 'Completed'] = 'yes'
+        task.to_csv(file_path, index=False)
+        return f'{task.loc[index, "Task"]} has been completed in Task Manager'
     else:
-        return f'chosen index is out of range or invalid: {index}'
+        return 'chosen index is out of range or invalid'
 
 
 def delete(index, file_path=DEFAULT_PATH):
-    tasks = pd.read_csv(file_path)
-    if index <= len(tasks):
-        tasks.drop(index=index).reset_index(drop=True)
-        tasks.to_csv(file_path, index=False)
-        return f'{tasks.loc[index, "Tasks"]} has been removed from Task Manager'
+    task = pd.read_csv(file_path)
+    if index < len(task):
+        task = task.drop(index=index).reset_index(drop=True)
+        task.to_csv(file_path, index=False)
+        return f'{task.loc[index, "Task"]} has been removed from Task Manager'
     else:
         return 'chosen index is out of range or invalid'
 
 
 def show(file_path=DEFAULT_PATH):
-    tasks = pd.read_csv(file_path)
-    return tasks
+    task = pd.read_csv(file_path)
+    return task
