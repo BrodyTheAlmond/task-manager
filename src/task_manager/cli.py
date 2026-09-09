@@ -1,5 +1,5 @@
 import argparse
-from src.task_manager.tasks import add, complete, delete, show, ensure_file
+from task_manager.tasks import add, complete, delete, show, ensure_file
 
 
 def main(argv=None):
@@ -7,27 +7,36 @@ def main(argv=None):
     parser = argparse.ArgumentParser(prog='task-manager')
     subparsers = parser.add_subparsers(dest='command')
 
-    add_parser = subparsers.add_parser('add')
-    add_parser.add_argument('task')
+    add_parser = subparsers.add_parser('add', help='Add a new task')
+    add_parser.add_argument('title', help='Title of the task')
+    add_parser.add_argument('-d', '--description', default='', help='Task description')
+    add_parser.add_argument('-p', '--priority', default='medium',
+                            choices=['low', 'medium', 'high'],
+                            help='Task priority (default: medium)')
 
-    complete_parser = subparsers.add_parser('complete')
-    complete_parser.add_argument('index', type=int)
+    complete_parser = subparsers.add_parser('complete', help='Mark a task complete')
+    complete_parser.add_argument('task_id', type=int, help='ID of the task to complete')
 
-    delete_parser = subparsers.add_parser('delete')
-    delete_parser.add_argument('index', type=int)
+    delete_parser = subparsers.add_parser('delete', help='Delete a task')
+    delete_parser.add_argument('task_id', type=int, help='ID of the task')
 
     show_parser = subparsers.add_parser('show')
 
     args = parser.parse_args(argv)
 
     if args.command == 'add':
-        print(add(args.task))
+        result = add(args.title, description=args.description, priority=args.priority)
+        print(result)
     elif args.command == 'complete':
-        print(complete(args.index))
+        result = complete(args.task_id)
+        print(result)
     elif args.command == 'delete':
-        print(delete(args.index))
+        result = delete(args.task_id)
+        print(result)
     elif args.command == 'show':
-        print(show())
+        for task in show():
+            status = "✓" if task.completed else " "
+            print(f"[{status}] {task.id}: {task.title} ({task.priority.value})")
 
 
 if __name__ == '__main__':

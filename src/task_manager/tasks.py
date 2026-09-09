@@ -1,47 +1,85 @@
+import enum
 from pathlib import Path
 from platformdirs import user_data_dir
-import pandas as pd
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, Session
+from sqlalchemy import Integer, String, Boolean, Enum, create_engine, select
 
-APP_NAME = "TaskManager"
+
+
+class Base(DeclarativeBase):
+    pass
+
+
+class PriorityLevel(enum.Enum):
+    HIGH = 'high'
+    MEDIUM = 'medium'
+    LOW = 'low'
+
+
+APP_NAME = 'TaskManager'
 DATA_DIR = Path(user_data_dir(APP_NAME))
-DEFAULT_PATH = DATA_DIR / "tasks.csv"
-fieldnames = ['Task', 'Completed']
+DEFAULT_PATH = DATA_DIR / 'tasks.db'
+
+
+class Task(Base):
+    __tablename__ = 'tasks'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String(250), nullable=False)
+    description: Mapped[str] = mapped_column(String(500), nullable=False)
+    priority: Mapped[PriorityLevel] = mapped_column(Enum(PriorityLevel), nullable=False)
+    completed: Mapped[bool] = mapped_column(Boolean, nullable=False)
+
+
+def get_engine(file_path=DEFAULT_PATH):
+    return create_engine(f'sqlite:///{file_path}')
 
 
 def ensure_file(file_path=DEFAULT_PATH):
     file_path = Path(file_path)
     file_path.parent.mkdir(parents=True, exist_ok=True)  # create dir if missing
-    if not file_path.is_file():
-        pd.DataFrame(columns=fieldnames).to_csv(file_path, index=False)
+    engine = get_engine(file_path)
+    Base.metadata.create_all(engine)  # creates tables if they don't exist
+    return engine
 
 
-def add(task, file_path=DEFAULT_PATH):
-    ensure_file(file_path)
-    new_task = pd.DataFrame([{'Task': task, 'Completed': 'no'}])
-    new_task.to_csv(file_path, mode='a', index=False, header=False)
-    return f'{task} has been added to Task Manager'
+def add(title, description='', priority='medium', file_path=DEFAULT_PATH):
+    engine = ensure_file(file_path)
+    with Session(engine) as session:
+        new_task = Task(
+            title=title,
+            description=description,
+            priority=PriorityLevel(priority),
+            completed=False
+        )
+        session.add(new_task)
+        session.commit()
+    return f'{title} has been added to Task Manager'
 
 
-def complete(index, file_path=DEFAULT_PATH):
-    tasks = pd.read_csv(file_path)
-    if index <= len(tasks):
-        tasks.loc[index, 'Completed'] = 'yes'
-        tasks.to_csv(file_path, index=False)
-        return f'{tasks.loc[index, "Tasks"]} has been completed in Task Manager'
-    else:
-        return f'chosen index is out of range or invalid: {index}'
+def complete(task_id, file_path=DEFAULT_PATH):
+    engine = ensure_file(file_path)
+    with Session(engine) as session:
+        task = session.get(Task, task_id)
+        if task is None:
+            return f'chosen id is out of range or invalid: {task_id}'
+        task.completed = True
+        session.commit()
+        return f'{task.title} has been completed in Task Manager'
 
 
-def delete(index, file_path=DEFAULT_PATH):
-    tasks = pd.read_csv(file_path)
-    if index <= len(tasks):
-        tasks.drop(index=index).reset_index(drop=True)
-        tasks.to_csv(file_path, index=False)
-        return f'{tasks.loc[index, "Tasks"]} has been removed from Task Manager'
-    else:
-        return 'chosen index is out of range or invalid'
+def delete(task_id, file_path=DEFAULT_PATH):
+    engine = ensure_file(file_path)
+    with Session(engine) as session:
+        task = session.get(Task, task_id)
+        if task is None:
+            return f'chosen id is out of range or invalid: {task_id}'
+        title = task.title
+        session.delete(task)
+        session.commit()
+        return f'{title} has been removed from Task Manager'
 
 
 def show(file_path=DEFAULT_PATH):
-    tasks = pd.read_csv(file_path)
-    return tasks
+    engine = ensure_file(file_path)
+    with Session(engine) as session:
+        return session.scalars(select(Task)).all()

@@ -5,15 +5,15 @@ from task_manager.cli import main
 def test_add_command_calls_add():
     with patch('task_manager.cli.add') as mock_add, \
          patch('task_manager.cli.ensure_file'):
-        main(['add', 'buy milk'])
-        mock_add.assert_called_once_with('buy milk')
+        main(['add', 'buy milk', '--description', 'for protein shakes', '--priority','medium'])
+        mock_add.assert_called_once_with('buy milk', description='for protein shakes', priority='medium')
 
 
 def test_complete_command_calls_complete_with_int_index():
     with patch('task_manager.cli.complete') as mock_complete, \
          patch('task_manager.cli.ensure_file'):
         main(['complete', '2'])
-        mock_complete.assert_called_once_with(2)  # note: int, not string '2'
+        mock_complete.assert_called_once_with(2)
 
 
 def test_delete_command_calls_delete():
@@ -28,3 +28,4 @@ def test_show_command_calls_show():
          patch('task_manager.cli.ensure_file'):
         main(['show'])
         mock_show.assert_called_once()
+
